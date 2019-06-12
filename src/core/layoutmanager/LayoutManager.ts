@@ -189,6 +189,10 @@ export class WrapGridLayoutManager extends LayoutManager {
         }
         let i = startIndex - 1;
         for (; i >= 0; i--) {
+            if (!this._layouts[i]) {
+                console.warn("WrapGridLayoutManager layout at index", i, "does not exist"); //tslint:disable-line
+                continue;
+            }
             if (this._isHorizontal) {
                 if (this._layouts[i].y === 0) {
                     break;
