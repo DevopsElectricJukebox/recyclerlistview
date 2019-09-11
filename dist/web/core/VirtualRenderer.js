@@ -58,6 +58,21 @@ var VirtualRenderer = /** @class */ (function () {
         this._startKey = 0;
         this.onVisibleItemsChanged = null;
     }
+    VirtualRenderer.sanitizeAssignRenderStack = function (renderStack, key, dataIndex) {
+        var existingKeysMatchingIndex = Object.keys(renderStack).filter(function (k) { return renderStack[k].dataIndex === dataIndex; });
+        if (existingKeysMatchingIndex.length) {
+            // console.warn( // tslint:disable-line
+            //     "VirtualRenderer.sanitizeAssignRenderStack deletes keys", existingKeysMatchingIndex,
+            //     "from renderStack because of matching dataIndex", dataIndex,
+            //     "for new key", key,
+            // );
+            for (var _i = 0, existingKeysMatchingIndex_1 = existingKeysMatchingIndex; _i < existingKeysMatchingIndex_1.length; _i++) {
+                var rsKey = existingKeysMatchingIndex_1[_i];
+                delete renderStack[rsKey];
+            }
+        }
+        renderStack[key] = { dataIndex: dataIndex };
+    };
     VirtualRenderer.prototype.getLayoutDimension = function () {
         if (this._layoutManager) {
             return this._layoutManager.getContentDimension();
@@ -168,18 +183,6 @@ var VirtualRenderer = /** @class */ (function () {
             this._isViewTrackerRunning = true;
             this._viewabilityTracker.init();
         }
-    };
-    VirtualRenderer.sanitizeAssignRenderStack = function (renderStack, key, dataIndex) {
-        var existingKeysMatchingIndex = Object.keys(renderStack).filter(function (k) { return renderStack[k].dataIndex === dataIndex; });
-        if (existingKeysMatchingIndex.length) {
-            console.warn(// tslint:disable-line
-            "VirtualRenderer.sanitizeAssignRenderStack deletes keys", existingKeysMatchingIndex, "from renderStack because of matching dataIndex", dataIndex, "for new key", key);
-            for (var _i = 0, existingKeysMatchingIndex_1 = existingKeysMatchingIndex; _i < existingKeysMatchingIndex_1.length; _i++) {
-                var rsKey = existingKeysMatchingIndex_1[_i];
-                delete renderStack[rsKey];
-            }
-        }
-        renderStack[key] = { dataIndex: dataIndex };
     };
     VirtualRenderer.prototype.syncAndGetKey = function (index, overrideStableIdProvider, newRenderStack) {
         var getStableId = overrideStableIdProvider ? overrideStableIdProvider : this._fetchStableId;

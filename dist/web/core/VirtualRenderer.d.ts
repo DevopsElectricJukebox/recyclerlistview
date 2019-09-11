@@ -24,6 +24,7 @@ export interface RenderStackParams {
 }
 export declare type StableIdProvider = (index: number) => string;
 export default class VirtualRenderer {
+    protected static sanitizeAssignRenderStack(renderStack: RenderStack, key: string, dataIndex: number): void;
     private onVisibleItemsChanged;
     private _scrollOnNextUpdate;
     private _stableIdToRenderKeyMap;
@@ -56,7 +57,6 @@ export default class VirtualRenderer {
     getInitialOffset(): Point;
     init(): void;
     startViewabilityTracker(): void;
-    protected static sanitizeAssignRenderStack(renderStack: RenderStack, key: string, dataIndex: number): void;
     syncAndGetKey(index: number, overrideStableIdProvider?: StableIdProvider, newRenderStack?: RenderStack): string;
     handleDataSetChange(newDataProvider: DataProvider, shouldOptimizeForAnimations?: boolean): void;
     setStableIdProvider(getStableId: StableIdProvider): void;

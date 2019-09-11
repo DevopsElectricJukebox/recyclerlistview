@@ -468,8 +468,10 @@ var RecyclerListView = /** @class */ (function (_super) {
             if (this.state.renderStack.hasOwnProperty(key)) {
                 var dataIndex = this.state.renderStack[key].dataIndex;
                 if (renderedIndices.has(dataIndex)) {
-                    console.warn(//tslint:disable-line
-                    "RecyclerListView._generateRenderStack skips duplicate dataIndex; key=", key, "value=\n", JSON.stringify(this.state.renderStack[key], null, 1));
+                    // console.warn( //tslint:disable-line
+                    //     "RecyclerListView._generateRenderStack skips duplicate dataIndex; key=", key,
+                    //     "value=\n", JSON.stringify(this.state.renderStack[key], null, 1),
+                    // );
                     continue;
                 }
                 renderedIndices.add(dataIndex);
@@ -477,10 +479,12 @@ var RecyclerListView = /** @class */ (function (_super) {
                 if (row !== null) {
                     renderedItems.push(row);
                 }
-                else {
-                    console.warn(//tslint:disable-line
-                    "RecyclerListView._generateRenderStack calling _renderRowUsingMeta returned null; key=", key, "value=\n", JSON.stringify(this.state.renderStack[key], null, 1));
-                }
+                // else {
+                //     console.warn( //tslint:disable-line
+                //         "RecyclerListView._generateRenderStack calling _renderRowUsingMeta returned null; key=", key,
+                //         "value=\n", JSON.stringify(this.state.renderStack[key], null, 1),
+                //     );
+                // }
             }
         }
         return renderedItems;

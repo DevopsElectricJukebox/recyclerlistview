@@ -31,6 +31,20 @@ export interface RenderStackParams {
 export type StableIdProvider = (index: number) => string;
 
 export default class VirtualRenderer {
+    protected static sanitizeAssignRenderStack(renderStack: RenderStack, key: string, dataIndex: number): void {
+        const existingKeysMatchingIndex = Object.keys(renderStack).filter((k) => renderStack[k].dataIndex === dataIndex);
+        if (existingKeysMatchingIndex.length) {
+            // console.warn( // tslint:disable-line
+            //     "VirtualRenderer.sanitizeAssignRenderStack deletes keys", existingKeysMatchingIndex,
+            //     "from renderStack because of matching dataIndex", dataIndex,
+            //     "for new key", key,
+            // );
+            for (const rsKey of existingKeysMatchingIndex) {
+                delete renderStack[rsKey];
+            }
+        }
+        renderStack[key] = { dataIndex };
+    }
 
     private onVisibleItemsChanged: TOnItemStatusChanged | null;
 
@@ -200,21 +214,6 @@ export default class VirtualRenderer {
             this._isViewTrackerRunning = true;
             this._viewabilityTracker.init();
         }
-    }
-
-    protected static sanitizeAssignRenderStack(renderStack: RenderStack, key: string, dataIndex: number): void {
-        const existingKeysMatchingIndex = Object.keys(renderStack).filter((k) => renderStack[k].dataIndex === dataIndex);
-        if (existingKeysMatchingIndex.length) {
-            console.warn( // tslint:disable-line
-                "VirtualRenderer.sanitizeAssignRenderStack deletes keys", existingKeysMatchingIndex,
-                "from renderStack because of matching dataIndex", dataIndex,
-                "for new key", key,
-            );
-            for (const rsKey of existingKeysMatchingIndex) {
-                delete renderStack[rsKey];
-            }
-        }
-        renderStack[key] = { dataIndex };
     }
 
     public syncAndGetKey(index: number, overrideStableIdProvider?: StableIdProvider, newRenderStack?: RenderStack): string {
