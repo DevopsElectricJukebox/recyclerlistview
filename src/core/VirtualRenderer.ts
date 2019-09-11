@@ -202,6 +202,21 @@ export default class VirtualRenderer {
         }
     }
 
+    protected static sanitizeAssignRenderStack(renderStack: RenderStack, key: string, dataIndex: number): void {
+        const existingKeysMatchingIndex = Object.keys(renderStack).filter((k) => renderStack[k].dataIndex === dataIndex);
+        if (existingKeysMatchingIndex.length) {
+            console.warn( // tslint:disable-line
+                "VirtualRenderer.sanitizeAssignRenderStack deletes keys", existingKeysMatchingIndex,
+                "from renderStack because of matching dataIndex", dataIndex,
+                "for new key", key,
+            );
+            for (const rsKey of existingKeysMatchingIndex) {
+                delete renderStack[rsKey];
+            }
+        }
+        renderStack[key] = { dataIndex };
+    }
+
     public syncAndGetKey(index: number, overrideStableIdProvider?: StableIdProvider, newRenderStack?: RenderStack): string {
         const getStableId = overrideStableIdProvider ? overrideStableIdProvider : this._fetchStableId;
         const renderStack = newRenderStack ? newRenderStack : this._renderStack;
@@ -220,7 +235,7 @@ export default class VirtualRenderer {
                         delete this._stableIdToRenderKeyMap[getStableId(oldIndex)];
                     }
                 } else {
-                    renderStack[key] = { dataIndex: index };
+                    VirtualRenderer.sanitizeAssignRenderStack(renderStack, key, index);
                 }
             } else {
                 key = getStableId(index);
@@ -230,7 +245,7 @@ export default class VirtualRenderer {
                     //console.warn("Possible stableId collision @", index); //tslint:disable-line
                     key = this._getCollisionAvoidingKey();
                 }
-                renderStack[key] = { dataIndex: index };
+                VirtualRenderer.sanitizeAssignRenderStack(renderStack, key, index);
             }
             this._markDirty = true;
             this._stableIdToRenderKeyMap[getStableId(index)] = { key, type };
