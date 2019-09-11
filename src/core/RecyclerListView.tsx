@@ -567,10 +567,28 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _generateRenderStack(): Array<JSX.Element | null> {
+        const renderedIndices = new Set();
         const renderedItems = [];
         for (const key in this.state.renderStack) {
             if (this.state.renderStack.hasOwnProperty(key)) {
-                renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
+                const { dataIndex } = this.state.renderStack[key];
+                if (renderedIndices.has(dataIndex)) {
+                    console.warn( //tslint:disable-line
+                        "RecyclerListView._generateRenderStack skips duplicate dataIndex; key=", key,
+                        "value=\n", JSON.stringify(this.state.renderStack[key], null, 1),
+                    );
+                    continue;
+                }
+                renderedIndices.add(dataIndex);
+                const row = this._renderRowUsingMeta(this.state.renderStack[key]);
+                if (row !== null) {
+                    renderedItems.push(row);
+                } else {
+                    console.warn( //tslint:disable-line
+                        "RecyclerListView._generateRenderStack calling _renderRowUsingMeta returned null; key=", key,
+                        "value=\n", JSON.stringify(this.state.renderStack[key], null, 1),
+                    );
+                }
             }
         }
         return renderedItems;
