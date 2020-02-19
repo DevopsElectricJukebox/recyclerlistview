@@ -79,17 +79,16 @@ var VirtualRenderer = /** @class */ (function () {
         }
         return { height: 0, width: 0 };
     };
-    VirtualRenderer.prototype.updateOffset = function (offsetX, offsetY) {
+    VirtualRenderer.prototype.updateOffset = function (offsetX, offsetY, correction, isActual) {
         if (this._viewabilityTracker) {
+            var offset = this._params && this._params.isHorizontal ? offsetX : offsetY;
             if (!this._isViewTrackerRunning) {
+                if (isActual) {
+                    this._viewabilityTracker.setActualOffset(offset);
+                }
                 this.startViewabilityTracker();
             }
-            if (this._params && this._params.isHorizontal) {
-                this._viewabilityTracker.updateOffset(offsetX);
-            }
-            else {
-                this._viewabilityTracker.updateOffset(offsetY);
-            }
+            this._viewabilityTracker.updateOffset(offset, correction, isActual);
         }
     };
     VirtualRenderer.prototype.attachVisibleItemsListener = function (callback) {
@@ -138,10 +137,10 @@ var VirtualRenderer = /** @class */ (function () {
             this._prepareViewabilityTracker();
             if (this._viewabilityTracker.forceRefresh()) {
                 if (this._params && this._params.isHorizontal) {
-                    this._scrollOnNextUpdate({ x: this._viewabilityTracker.getLastOffset(), y: 0 });
+                    this._scrollOnNextUpdate({ x: this._viewabilityTracker.getLastActualOffset(), y: 0 });
                 }
                 else {
-                    this._scrollOnNextUpdate({ x: 0, y: this._viewabilityTracker.getLastOffset() });
+                    this._scrollOnNextUpdate({ x: 0, y: this._viewabilityTracker.getLastActualOffset() });
                 }
             }
         }

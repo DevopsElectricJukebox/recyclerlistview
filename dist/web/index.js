@@ -4,6 +4,7 @@ var ContextProvider_1 = require("./core/dependencies/ContextProvider");
 exports.ContextProvider = ContextProvider_1.default;
 var DataProvider_1 = require("./core/dependencies/DataProvider");
 exports.DataProvider = DataProvider_1.default;
+exports.BaseDataProvider = DataProvider_1.BaseDataProvider;
 var LayoutProvider_1 = require("./core/dependencies/LayoutProvider");
 exports.BaseLayoutProvider = LayoutProvider_1.BaseLayoutProvider;
 exports.LayoutProvider = LayoutProvider_1.LayoutProvider;

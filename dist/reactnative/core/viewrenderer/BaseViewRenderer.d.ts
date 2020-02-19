@@ -23,6 +23,7 @@ export interface ViewRendererProps<T> {
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
+    internalSnapshot?: object;
     layoutProvider?: BaseLayoutProvider;
 }
 export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {

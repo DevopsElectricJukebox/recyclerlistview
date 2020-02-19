@@ -11,6 +11,7 @@ export default class ScrollViewer extends BaseScrollView {
         style: null;
         useWindowScroll: boolean;
     };
+    private scrollEndEventSimulator;
     private _mainDivRef;
     private _isScrolling;
     private _scrollEventNormalizer;

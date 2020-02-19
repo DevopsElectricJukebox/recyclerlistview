@@ -54,14 +54,14 @@ var StickyContainer = /** @class */ (function (_super) {
             }
         };
         _this._getStickyHeaderRef = function (stickyHeaderRef) {
-            if (!_this._stickyHeaderRef) {
+            if (_this._stickyHeaderRef !== stickyHeaderRef) {
                 _this._stickyHeaderRef = stickyHeaderRef;
                 // TODO: Resetting state once ref is initialized. Can look for better solution.
                 _this._callStickyObjectsOnVisibleIndicesChanged(_this._visibleIndicesAll);
             }
         };
         _this._getStickyFooterRef = function (stickyFooterRef) {
-            if (!_this._stickyFooterRef) {
+            if (_this._stickyFooterRef !== stickyFooterRef) {
                 _this._stickyFooterRef = stickyFooterRef;
                 // TODO: Resetting state once ref is initialized. Can look for better solution.
                 _this._callStickyObjectsOnVisibleIndicesChanged(_this._visibleIndicesAll);

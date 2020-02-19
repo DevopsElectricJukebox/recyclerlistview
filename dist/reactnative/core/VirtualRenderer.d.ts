@@ -1,7 +1,7 @@
 import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import { Point, LayoutManager } from "./layoutmanager/LayoutManager";
 import ViewabilityTracker, { TOnItemStatusChanged } from "./ViewabilityTracker";
-import DataProvider from "./dependencies/DataProvider";
+import { BaseDataProvider } from "./dependencies/DataProvider";
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
  */
@@ -44,7 +44,7 @@ export default class VirtualRenderer {
     private _dimensions;
     constructor(renderStackChanged: (renderStack: RenderStack) => void, scrollOnNextUpdate: (point: Point) => void, fetchStableId: StableIdProvider, isRecyclingEnabled: boolean);
     getLayoutDimension(): Dimension;
-    updateOffset(offsetX: number, offsetY: number): void;
+    updateOffset(offsetX: number, offsetY: number, correction: number, isActual: boolean): void;
     attachVisibleItemsListener(callback: TOnItemStatusChanged): void;
     removeVisibleItemsListener(): void;
     getLayoutManager(): LayoutManager | null;
@@ -58,7 +58,7 @@ export default class VirtualRenderer {
     init(): void;
     startViewabilityTracker(): void;
     syncAndGetKey(index: number, overrideStableIdProvider?: StableIdProvider, newRenderStack?: RenderStack): string;
-    handleDataSetChange(newDataProvider: DataProvider, shouldOptimizeForAnimations?: boolean): void;
+    handleDataSetChange(newDataProvider: BaseDataProvider, shouldOptimizeForAnimations?: boolean): void;
     setStableIdProvider(getStableId: StableIdProvider): void;
     private _getCollisionAvoidingKey;
     private _prepareViewabilityTracker;

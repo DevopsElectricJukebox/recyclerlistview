@@ -11,8 +11,8 @@ var ViewabilityTracker = /** @class */ (function () {
             return _this._relevantDim.end;
         };
         this._currentOffset = Math.max(0, initialOffset);
-        this._actualOffset = this._currentOffset;
         this._maxOffset = 0;
+        this._actualOffset = 0;
         this._renderAheadOffset = renderAheadOffset;
         this._visibleWindow = { start: 0, end: 0 };
         this._engagedWindow = { start: 0, end: 0 };
@@ -42,11 +42,13 @@ var ViewabilityTracker = /** @class */ (function () {
     };
     ViewabilityTracker.prototype.forceRefreshWithOffset = function (offset) {
         this._currentOffset = -1;
-        this.updateOffset(offset);
+        this.updateOffset(offset, 0, false);
     };
-    ViewabilityTracker.prototype.updateOffset = function (offset) {
-        this._actualOffset = offset;
-        offset = Math.min(this._maxOffset, Math.max(0, offset));
+    ViewabilityTracker.prototype.updateOffset = function (offset, correction, isActual) {
+        if (isActual) {
+            this._actualOffset = offset;
+        }
+        offset = Math.min(this._maxOffset, Math.max(0, offset + correction));
         if (this._currentOffset !== offset) {
             this._currentOffset = offset;
             this._updateTrackingWindows(offset);
@@ -95,6 +97,9 @@ var ViewabilityTracker = /** @class */ (function () {
     };
     ViewabilityTracker.prototype.getCurrentRenderAheadOffset = function () {
         return this._renderAheadOffset;
+    };
+    ViewabilityTracker.prototype.setActualOffset = function (actualOffset) {
+        this._actualOffset = actualOffset;
     };
     ViewabilityTracker.prototype._findFirstVisibleIndexOptimally = function () {
         var firstVisibleIndex = 0;

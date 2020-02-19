@@ -1,6 +1,6 @@
 import * as React from "react";
 import ContextProvider from "./dependencies/ContextProvider";
-import DataProvider from "./dependencies/DataProvider";
+import { BaseDataProvider } from "./dependencies/DataProvider";
 import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import { Layout } from "./layoutmanager/LayoutManager";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
@@ -8,6 +8,9 @@ import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack } from "./VirtualRenderer";
 import ItemAnimator from "./ItemAnimator";
 import { DebugHandlers } from "..";
+/***
+ * To use on web, start importing from recyclerlistview/web. To make it even easier specify an alias in you builder of choice.
+ */
 /***
  * This is the main component, please refer to samples to understand how to use.
  * For advanced usage check out prop descriptions below.
@@ -29,7 +32,7 @@ export interface OnRecreateParams {
 }
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
-    dataProvider: DataProvider;
+    dataProvider: BaseDataProvider;
     rowRenderer: (type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     contextProvider?: ContextProvider;
     renderAheadOffset?: number;
@@ -61,6 +64,7 @@ export interface RecyclerListViewProps {
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
+    internalSnapshot: Record<string, object>;
 }
 export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends React.Component<P, S> {
     static defaultProps: {
@@ -74,6 +78,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         renderAheadOffset: number;
     };
     static propTypes: {};
+    private refreshRequestDebouncer;
     private _virtualRenderer;
     private _onEndReachedCalled;
     private _initComplete;
@@ -103,6 +108,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     findApproxFirstVisibleIndex(): number;
     getRenderedSize(): Dimension;
     getContentDimension(): Dimension;
+    forceRerender(): void;
     render(): JSX.Element;
     protected getVirtualRenderer(): VirtualRenderer;
     private _checkAndChangeLayouts;

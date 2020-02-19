@@ -25,8 +25,9 @@ var BaseViewRenderer = /** @class */ (function (_super) {
             (this.props.width !== newProps.width || this.props.height !== newProps.height) ||
             this.props.layoutProvider !== newProps.layoutProvider;
         var hasExtendedStateChanged = this.props.extendedState !== newProps.extendedState;
+        var hasInternalSnapshotChanged = this.props.internalSnapshot !== newProps.internalSnapshot;
         var hasDataChanged = (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data));
-        var shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged;
+        var shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged || hasInternalSnapshotChanged;
         if (shouldUpdate) {
             newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef(), newProps.index);
         }
