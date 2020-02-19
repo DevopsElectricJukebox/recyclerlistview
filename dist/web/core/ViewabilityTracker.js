@@ -23,9 +23,10 @@ var ViewabilityTracker = /** @class */ (function () {
         this.onVisibleRowsChanged = null;
         this.onEngagedRowsChanged = null;
         this._relevantDim = { start: 0, end: 0 };
+        this._defaultCorrection = { startCorrection: 0, endCorrection: 0, windowShift: 0 };
     }
-    ViewabilityTracker.prototype.init = function () {
-        this._doInitialFit(this._currentOffset);
+    ViewabilityTracker.prototype.init = function (windowCorrection) {
+        this._doInitialFit(this._currentOffset, windowCorrection);
     };
     ViewabilityTracker.prototype.setLayouts = function (layouts, maxOffset) {
         this._layouts = layouts;
@@ -42,16 +43,17 @@ var ViewabilityTracker = /** @class */ (function () {
     };
     ViewabilityTracker.prototype.forceRefreshWithOffset = function (offset) {
         this._currentOffset = -1;
-        this.updateOffset(offset, 0, false);
+        this.updateOffset(offset, false, this._defaultCorrection);
     };
-    ViewabilityTracker.prototype.updateOffset = function (offset, correction, isActual) {
+    ViewabilityTracker.prototype.updateOffset = function (offset, isActual, windowCorrection) {
+        var correctedOffset = offset;
         if (isActual) {
             this._actualOffset = offset;
+            correctedOffset = Math.min(this._maxOffset, Math.max(0, offset + (windowCorrection.windowShift + windowCorrection.startCorrection)));
         }
-        offset = Math.min(this._maxOffset, Math.max(0, offset + correction));
-        if (this._currentOffset !== offset) {
-            this._currentOffset = offset;
-            this._updateTrackingWindows(offset);
+        if (this._currentOffset !== correctedOffset) {
+            this._currentOffset = correctedOffset;
+            this._updateTrackingWindows(offset, windowCorrection);
             var startIndex = 0;
             if (this._visibleIndexes.length > 0) {
                 startIndex = this._visibleIndexes[0];
@@ -119,9 +121,9 @@ var ViewabilityTracker = /** @class */ (function () {
         this._fitIndexes(newVisibleItems, newEngagedItems, startIndex + 1, false);
         this._diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems, newEngagedItems);
     };
-    ViewabilityTracker.prototype._doInitialFit = function (offset) {
+    ViewabilityTracker.prototype._doInitialFit = function (offset, windowCorrection) {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
-        this._updateTrackingWindows(offset);
+        this._updateTrackingWindows(offset, windowCorrection);
         var firstVisibleIndex = this._findFirstVisibleIndexOptimally();
         this._fitAndUpdate(firstVisibleIndex);
     };
@@ -220,10 +222,14 @@ var ViewabilityTracker = /** @class */ (function () {
     ViewabilityTracker.prototype._isItemBoundsBeyondWindow = function (window, startBound, endBound) {
         return (window.start >= startBound && window.end <= endBound);
     };
+    ViewabilityTracker.prototype._isZeroHeightEdgeElement = function (window, startBound, endBound) {
+        return startBound - endBound === 0 && (window.start === startBound || window.end === endBound);
+    };
     ViewabilityTracker.prototype._itemIntersectsWindow = function (window, startBound, endBound) {
         return this._isItemInBounds(window, startBound) ||
             this._isItemInBounds(window, endBound) ||
-            this._isItemBoundsBeyondWindow(window, startBound, endBound);
+            this._isItemBoundsBeyondWindow(window, startBound, endBound) ||
+            this._isZeroHeightEdgeElement(window, startBound, endBound);
     };
     ViewabilityTracker.prototype._itemIntersectsEngagedWindow = function (startBound, endBound) {
         return this._itemIntersectsWindow(this._engagedWindow, startBound, endBound);
@@ -231,11 +237,15 @@ var ViewabilityTracker = /** @class */ (function () {
     ViewabilityTracker.prototype._itemIntersectsVisibleWindow = function (startBound, endBound) {
         return this._itemIntersectsWindow(this._visibleWindow, startBound, endBound);
     };
-    ViewabilityTracker.prototype._updateTrackingWindows = function (newOffset) {
-        this._engagedWindow.start = Math.max(0, newOffset - this._renderAheadOffset);
-        this._engagedWindow.end = newOffset + this._windowBound + this._renderAheadOffset;
-        this._visibleWindow.start = newOffset;
-        this._visibleWindow.end = newOffset + this._windowBound;
+    ViewabilityTracker.prototype._updateTrackingWindows = function (offset, correction) {
+        var startCorrection = correction.windowShift + correction.startCorrection;
+        var bottomCorrection = correction.windowShift + correction.endCorrection;
+        var startOffset = offset + startCorrection;
+        var endOffset = (offset + this._windowBound) + bottomCorrection;
+        this._engagedWindow.start = Math.max(0, startOffset - this._renderAheadOffset);
+        this._engagedWindow.end = endOffset + this._renderAheadOffset;
+        this._visibleWindow.start = startOffset;
+        this._visibleWindow.end = endOffset;
     };
     //TODO:Talha optimize this
     ViewabilityTracker.prototype._diffUpdateOriginalIndexesAndRaiseEvents = function (newVisibleItems, newEngagedItems) {

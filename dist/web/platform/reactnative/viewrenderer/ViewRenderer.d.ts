@@ -9,7 +9,7 @@ import BaseViewRenderer from "../../../core/viewrenderer/BaseViewRenderer";
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim;
     private _viewRef;
-    render(): JSX.Element;
+    renderCompat(): JSX.Element;
     protected getRef(): object | null;
     private _setRef;
     private _onLayout;

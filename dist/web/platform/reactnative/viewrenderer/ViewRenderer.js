@@ -58,7 +58,7 @@ var ViewRenderer = /** @class */ (function (_super) {
         };
         return _this;
     }
-    ViewRenderer.prototype.render = function () {
+    ViewRenderer.prototype.renderCompat = function () {
         return this.props.forceNonDeterministicRendering ? (React.createElement(react_native_1.View, { ref: this._setRef, onLayout: this._onLayout, style: __assign({ flexDirection: this.props.isHorizontal ? "column" : "row", left: this.props.x, position: "absolute", top: this.props.y }, this.props.styleOverrides, this.animatorStyleOverrides) }, this.renderChild())) : (React.createElement(react_native_1.View, { ref: this._setRef, style: __assign({ left: this.props.x, position: "absolute", top: this.props.y, height: this.props.height, width: this.props.width }, this.props.styleOverrides, this.animatorStyleOverrides) }, this.renderChild()));
     };
     ViewRenderer.prototype.getRef = function () {

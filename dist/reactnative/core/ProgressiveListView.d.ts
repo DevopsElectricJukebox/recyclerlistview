@@ -17,7 +17,6 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
         initialRenderIndex: number;
         isHorizontal: boolean;
         onEndReachedThreshold: number;
-        distanceFromWindow: number;
     };
     private renderAheadUdpateCallbackId?;
     componentDidMount(): void;

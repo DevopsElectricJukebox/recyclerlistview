@@ -23,15 +23,23 @@ var StickyFooter = /** @class */ (function (_super) {
     function StickyFooter(props, context) {
         return _super.call(this, props, context) || this;
     }
+    StickyFooter.prototype.onScroll = function (offsetY) {
+        var endCorrection = this.getWindowCorrection(this.props).endCorrection;
+        if (endCorrection) {
+            this.containerPosition = { bottom: endCorrection };
+            offsetY -= endCorrection;
+        }
+        _super.prototype.onScroll.call(this, offsetY);
+    };
     StickyFooter.prototype.initStickyParams = function () {
         this.stickyType = StickyObject_1.StickyType.FOOTER;
         this.stickyTypeMultiplier = -1;
-        this.containerPosition = { bottom: 0 };
+        this.containerPosition = { bottom: this.getWindowCorrection(this.props).endCorrection };
         this.bounceScrolling = false;
     };
-    StickyFooter.prototype.calculateVisibleStickyIndex = function (stickyIndices, _smallestVisibleIndex, largestVisibleIndex, offsetY, distanceFromWindow, windowBound) {
+    StickyFooter.prototype.calculateVisibleStickyIndex = function (stickyIndices, _smallestVisibleIndex, largestVisibleIndex, offsetY, windowBound) {
         if (stickyIndices && largestVisibleIndex) {
-            this.bounceScrolling = this.hasReachedBoundary(offsetY, distanceFromWindow, windowBound);
+            this.bounceScrolling = this.hasReachedBoundary(offsetY, windowBound);
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1] || this.bounceScrolling) {
                 this.stickyVisiblity = false;
             }
@@ -57,9 +65,9 @@ var StickyFooter = /** @class */ (function (_super) {
     StickyFooter.prototype.getScrollY = function (offsetY, scrollableHeight) {
         return scrollableHeight ? -1 * (offsetY + scrollableHeight) : undefined;
     };
-    StickyFooter.prototype.hasReachedBoundary = function (offsetY, distanceFromWindow, windowBound) {
+    StickyFooter.prototype.hasReachedBoundary = function (offsetY, windowBound) {
         if (windowBound) {
-            var endReachedMargin = Math.round(offsetY - (windowBound + distanceFromWindow));
+            var endReachedMargin = Math.round(offsetY - (windowBound));
             return endReachedMargin >= 0;
         }
         return false;

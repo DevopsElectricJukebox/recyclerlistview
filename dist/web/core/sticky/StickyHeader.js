@@ -23,17 +23,25 @@ var StickyHeader = /** @class */ (function (_super) {
     function StickyHeader(props, context) {
         return _super.call(this, props, context) || this;
     }
+    StickyHeader.prototype.onScroll = function (offsetY) {
+        var startCorrection = this.getWindowCorrection(this.props).startCorrection;
+        if (startCorrection) {
+            this.containerPosition = { top: startCorrection };
+            offsetY += startCorrection;
+        }
+        _super.prototype.onScroll.call(this, offsetY);
+    };
     StickyHeader.prototype.initStickyParams = function () {
         this.stickyType = StickyObject_1.StickyType.HEADER;
         this.stickyTypeMultiplier = 1;
-        this.containerPosition = { top: 0 };
+        this.containerPosition = { top: this.getWindowCorrection(this.props).startCorrection };
         // Kept as true contrary to as in StickyFooter because in case of initialOffset not given, onScroll isn't called and boundaryProcessing isn't done.
         // Default behaviour in that case will be sticky header hidden.
         this.bounceScrolling = true;
     };
-    StickyHeader.prototype.calculateVisibleStickyIndex = function (stickyIndices, smallestVisibleIndex, largestVisibleIndex, offsetY, distanceFromWindow) {
+    StickyHeader.prototype.calculateVisibleStickyIndex = function (stickyIndices, smallestVisibleIndex, largestVisibleIndex, offsetY, windowBound) {
         if (stickyIndices && smallestVisibleIndex !== undefined) {
-            this.bounceScrolling = this.hasReachedBoundary(offsetY, distanceFromWindow);
+            this.bounceScrolling = this.hasReachedBoundary(offsetY, windowBound);
             if (smallestVisibleIndex < stickyIndices[0] || this.bounceScrolling) {
                 this.stickyVisiblity = false;
             }
@@ -59,8 +67,9 @@ var StickyHeader = /** @class */ (function (_super) {
     StickyHeader.prototype.getScrollY = function (offsetY, scrollableHeight) {
         return offsetY;
     };
-    StickyHeader.prototype.hasReachedBoundary = function (offsetY, distanceFromWindow, _windowBound) {
-        return offsetY <= distanceFromWindow;
+    StickyHeader.prototype.hasReachedBoundary = function (offsetY, _windowBound) {
+        //TODO (Swapnil) Refer to talha and understand what needs to be done.
+        return false;
     };
     return StickyHeader;
 }(StickyObject_1.default));

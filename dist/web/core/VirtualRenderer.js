@@ -79,16 +79,16 @@ var VirtualRenderer = /** @class */ (function () {
         }
         return { height: 0, width: 0 };
     };
-    VirtualRenderer.prototype.updateOffset = function (offsetX, offsetY, correction, isActual) {
+    VirtualRenderer.prototype.updateOffset = function (offsetX, offsetY, isActual, correction) {
         if (this._viewabilityTracker) {
             var offset = this._params && this._params.isHorizontal ? offsetX : offsetY;
             if (!this._isViewTrackerRunning) {
                 if (isActual) {
                     this._viewabilityTracker.setActualOffset(offset);
                 }
-                this.startViewabilityTracker();
+                this.startViewabilityTracker(correction);
             }
-            this._viewabilityTracker.updateOffset(offset, correction, isActual);
+            this._viewabilityTracker.updateOffset(offset, isActual, correction);
         }
     };
     VirtualRenderer.prototype.attachVisibleItemsListener = function (callback) {
@@ -125,6 +125,7 @@ var VirtualRenderer = /** @class */ (function () {
             this._prepareViewabilityTracker();
             var offset = 0;
             if (this._layoutManager && this._params) {
+                firstVisibleIndex = Math.min(this._params.itemCount - 1, firstVisibleIndex);
                 var point = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
                 this._scrollOnNextUpdate(point);
                 offset = this._params.isHorizontal ? point.x : point.y;
@@ -177,10 +178,10 @@ var VirtualRenderer = /** @class */ (function () {
         }
         this._prepareViewabilityTracker();
     };
-    VirtualRenderer.prototype.startViewabilityTracker = function () {
+    VirtualRenderer.prototype.startViewabilityTracker = function (windowCorrection) {
         if (this._viewabilityTracker) {
             this._isViewTrackerRunning = true;
-            this._viewabilityTracker.init();
+            this._viewabilityTracker.init(windowCorrection);
         }
     };
     VirtualRenderer.prototype.syncAndGetKey = function (index, overrideStableIdProvider, newRenderStack) {

@@ -4,37 +4,43 @@
 import * as React from "react";
 import { StyleProp, ViewStyle } from "react-native";
 import { RecyclerListViewProps } from "./RecyclerListView";
+import { ComponentCompat } from "../utils/ComponentCompat";
+import { WindowCorrection } from "./ViewabilityTracker";
 export interface StickyContainerProps {
     children: RecyclerChild;
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    applyWindowCorrection?: (offsetX: number, offsetY: number, winowCorrection: WindowCorrection) => void;
+    renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
     ref: (recyclerRef: any) => {};
     props: RecyclerListViewProps;
 }
-export default class StickyContainer<P extends StickyContainerProps> extends React.Component<P> {
+export default class StickyContainer<P extends StickyContainerProps> extends ComponentCompat<P> {
     static propTypes: {};
     private _recyclerRef;
     private _dataProvider;
     private _layoutProvider;
     private _extendedState;
     private _rowRenderer;
-    private _distanceFromWindow;
     private _stickyHeaderRef;
     private _stickyFooterRef;
     private _visibleIndicesAll;
+    private _windowCorrection;
     constructor(props: P, context?: any);
-    componentWillReceiveProps(newProps: P): void;
-    render(): JSX.Element;
+    componentWillReceivePropsCompat(newProps: P): void;
+    renderCompat(): JSX.Element;
     private _getRecyclerRef;
+    private _getCurrentWindowCorrection;
     private _getStickyHeaderRef;
     private _getStickyFooterRef;
     private _onVisibleIndicesChanged;
     private _callStickyObjectsOnVisibleIndicesChanged;
     private _onScroll;
+    private _getWindowCorrection;
     private _assertChildType;
     private _isChildRecyclerInstance;
     private _getLayoutForIndex;
@@ -44,6 +50,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
     private _getRowRenderer;
     private _getRLVRenderedSize;
     private _getContentDimension;
-    private _getDistanceFromWindow;
+    private _applyWindowCorrection;
     private _initParams;
 }

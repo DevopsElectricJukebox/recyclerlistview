@@ -41,7 +41,9 @@ var ScrollComponent = /** @class */ (function (_super) {
         _this._getScrollViewRef = function (scrollView) { _this._scrollViewRef = scrollView; };
         _this._onScroll = function (event) {
             if (event) {
-                _this.props.onScroll(event.nativeEvent.contentOffset.x, event.nativeEvent.contentOffset.y, event);
+                var contentOffset = event.nativeEvent.contentOffset;
+                _this._offset = _this.props.isHorizontal ? contentOffset.x : contentOffset.y;
+                _this.props.onScroll(contentOffset.x, contentOffset.y, event);
             }
         };
         _this._onLayout = function (event) {
@@ -59,6 +61,7 @@ var ScrollComponent = /** @class */ (function (_super) {
         };
         _this._height = 0;
         _this._width = 0;
+        _this._offset = 0;
         _this._isSizeChangedCalledOnce = false;
         return _this;
     }
@@ -69,6 +72,16 @@ var ScrollComponent = /** @class */ (function (_super) {
     };
     ScrollComponent.prototype.render = function () {
         var Scroller = TSCast_1.default.cast(this.props.externalScrollView); //TSI
+        var renderContentContainer = this.props.renderContentContainer ? this.props.renderContentContainer : this._defaultContainer;
+        var contentContainerProps = {
+            style: {
+                height: this.props.contentHeight,
+                width: this.props.contentWidth,
+            },
+            horizontal: this.props.isHorizontal,
+            scrollOffset: this._offset,
+            windowSize: (this.props.isHorizontal ? this._width : this._height) + this.props.renderAheadOffset,
+        };
         //TODO:Talha
         // const {
         //     useWindowScroll,
@@ -83,11 +96,11 @@ var ScrollComponent = /** @class */ (function (_super) {
         // } = this.props;
         return (React.createElement(Scroller, __assign({ ref: this._getScrollViewRef, removeClippedSubviews: false, scrollEventThrottle: this.props.scrollThrottle }, this.props, { horizontal: this.props.isHorizontal, onScroll: this._onScroll, onLayout: (!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : this.props.onLayout }),
             React.createElement(react_native_1.View, { style: { flexDirection: this.props.isHorizontal ? "row" : "column" } },
-                React.createElement(react_native_1.View, { style: {
-                        height: this.props.contentHeight,
-                        width: this.props.contentWidth,
-                    } }, this.props.children),
+                renderContentContainer(contentContainerProps, this.props.children),
                 this.props.renderFooter ? this.props.renderFooter() : null)));
+    };
+    ScrollComponent.prototype._defaultContainer = function (props, children) {
+        return (React.createElement(react_native_1.View, __assign({}, props), children));
     };
     ScrollComponent.defaultProps = {
         contentHeight: 0,

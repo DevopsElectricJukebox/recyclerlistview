@@ -4,10 +4,11 @@ import { BaseDataProvider } from "./dependencies/DataProvider";
 import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import { Layout } from "./layoutmanager/LayoutManager";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
-import { TOnItemStatusChanged } from "./ViewabilityTracker";
+import { TOnItemStatusChanged, WindowCorrection } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack } from "./VirtualRenderer";
 import ItemAnimator from "./ItemAnimator";
 import { DebugHandlers } from "..";
+import { ComponentCompat } from "../utils/ComponentCompat";
 /***
  * This is the main component, please refer to samples to understand how to use.
  * For advanced usage check out prop descriptions below.
@@ -48,7 +49,6 @@ export interface RecyclerListViewProps {
     initialRenderIndex?: number;
     scrollThrottle?: number;
     canChangeSize?: boolean;
-    distanceFromWindow?: number;
     useWindowScroll?: boolean;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
@@ -57,13 +57,15 @@ export interface RecyclerListViewProps {
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object | number;
     debugHandlers?: DebugHandlers;
+    renderContentContainer?: (props?: object, children?: React.ReactNode) => React.ReactNode | null;
     scrollViewProps?: object;
+    applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
     internalSnapshot: Record<string, object>;
 }
-export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends React.Component<P, S> {
+export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends ComponentCompat<P, S> {
     static defaultProps: {
         canChangeSize: boolean;
         disableRecycling: boolean;
@@ -71,7 +73,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         initialRenderIndex: number;
         isHorizontal: boolean;
         onEndReachedThreshold: number;
-        distanceFromWindow: number;
         renderAheadOffset: number;
     };
     static propTypes: {};
@@ -87,12 +88,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _initialOffset;
     private _cachedLayouts?;
     private _scrollComponent;
+    private _windowCorrection;
     private _defaultItemAnimator;
     constructor(props: P, context?: any);
-    componentWillReceiveProps(newProps: RecyclerListViewProps): void;
+    componentWillReceivePropsCompat(newProps: RecyclerListViewProps): void;
     componentDidUpdate(): void;
     componentWillUnmount(): void;
-    componentWillMount(): void;
+    componentWillMountCompat(): void;
     scrollToIndex(index: number, animate?: boolean): void;
     scrollToItem(data: any, animate?: boolean): void;
     getLayout(index: number): Layout | undefined;
@@ -106,7 +108,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     getRenderedSize(): Dimension;
     getContentDimension(): Dimension;
     forceRerender(): void;
-    render(): JSX.Element;
+    renderCompat(): JSX.Element;
     protected getVirtualRenderer(): VirtualRenderer;
     private _checkAndChangeLayouts;
     private _refreshViewability;
@@ -114,6 +116,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _onSizeChanged;
     private _renderStackWhenReady;
     private _initTrackers;
+    private _getWindowCorrection;
     private _assertDependencyPresence;
     private _assertType;
     private _dataHasChanged;

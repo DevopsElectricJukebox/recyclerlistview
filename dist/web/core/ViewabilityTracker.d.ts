@@ -11,6 +11,11 @@ export interface Range {
     start: number;
     end: number;
 }
+export interface WindowCorrection {
+    windowShift: number;
+    startCorrection: number;
+    endCorrection: number;
+}
 export declare type TOnItemStatusChanged = ((all: number[], now: number[], notNow: number[]) => void);
 export default class ViewabilityTracker {
     onVisibleRowsChanged: TOnItemStatusChanged | null;
@@ -27,13 +32,14 @@ export default class ViewabilityTracker {
     private _engagedIndexes;
     private _layouts;
     private _actualOffset;
+    private _defaultCorrection;
     constructor(renderAheadOffset: number, initialOffset: number);
-    init(): void;
+    init(windowCorrection: WindowCorrection): void;
     setLayouts(layouts: Layout[], maxOffset: number): void;
     setDimensions(dimension: Dimension, isHorizontal: boolean): void;
     forceRefresh(): boolean;
     forceRefreshWithOffset(offset: number): void;
-    updateOffset(offset: number, correction: number, isActual: boolean): void;
+    updateOffset(offset: number, isActual: boolean, windowCorrection: WindowCorrection): void;
     getLastOffset(): number;
     getLastActualOffset(): number;
     getEngagedIndexes(): number[];
@@ -52,6 +58,7 @@ export default class ViewabilityTracker {
     private _setRelevantBounds;
     private _isItemInBounds;
     private _isItemBoundsBeyondWindow;
+    private _isZeroHeightEdgeElement;
     private _itemIntersectsWindow;
     private _itemIntersectsEngagedWindow;
     private _itemIntersectsVisibleWindow;

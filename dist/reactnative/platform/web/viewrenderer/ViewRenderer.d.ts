@@ -11,7 +11,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _mainDiv;
     componentDidMount(): void;
     componentDidUpdate(): void;
-    render(): JSX.Element;
+    renderCompat(): JSX.Element;
     protected getRef(): object | null;
     private _setRef;
     private _getTransform;

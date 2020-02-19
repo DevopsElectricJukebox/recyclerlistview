@@ -1,13 +1,14 @@
 /**
  * Created by ananya.chandra on 20/09/18.
  */
-import StickyObject, { StickyObjectProps, StickyObjectState } from "./StickyObject";
-export default class StickyFooter<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
+import StickyObject, { StickyObjectProps } from "./StickyObject";
+export default class StickyFooter<P extends StickyObjectProps> extends StickyObject<P> {
     constructor(props: P, context?: any);
+    onScroll(offsetY: number): void;
     protected initStickyParams(): void;
-    protected calculateVisibleStickyIndex(stickyIndices: number[] | undefined, _smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, distanceFromWindow: number, windowBound?: number): void;
+    protected calculateVisibleStickyIndex(stickyIndices: number[] | undefined, _smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound?: number): void;
     protected getNextYd(nextY: number, nextHeight: number): number;
     protected getCurrentYd(currentY: number, currentHeight: number): number;
     protected getScrollY(offsetY: number, scrollableHeight: number): number | undefined;
-    protected hasReachedBoundary(offsetY: number, distanceFromWindow: number, windowBound?: number): boolean;
+    protected hasReachedBoundary(offsetY: number, windowBound?: number): boolean;
 }

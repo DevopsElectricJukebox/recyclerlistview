@@ -34,6 +34,7 @@ var StickyHeader_1 = require("./sticky/StickyHeader");
 var StickyFooter_1 = require("./sticky/StickyFooter");
 var CustomError_1 = require("./exceptions/CustomError");
 var RecyclerListViewExceptions_1 = require("./exceptions/RecyclerListViewExceptions");
+var ComponentCompat_1 = require("../utils/ComponentCompat");
 var StickyContainer = /** @class */ (function (_super) {
     __extends(StickyContainer, _super);
     function StickyContainer(props, context) {
@@ -42,6 +43,9 @@ var StickyContainer = /** @class */ (function (_super) {
         _this._stickyHeaderRef = null;
         _this._stickyFooterRef = null;
         _this._visibleIndicesAll = [];
+        _this._windowCorrection = {
+            startCorrection: 0, endCorrection: 0, windowShift: 0,
+        };
         _this._getRecyclerRef = function (recycler) {
             _this._recyclerRef = recycler;
             if (_this.props.children.ref) {
@@ -52,6 +56,9 @@ var StickyContainer = /** @class */ (function (_super) {
                     throw new CustomError_1.default(RecyclerListViewExceptions_1.default.refNotAsFunctionException);
                 }
             }
+        };
+        _this._getCurrentWindowCorrection = function () {
+            return _this._windowCorrection;
         };
         _this._getStickyHeaderRef = function (stickyHeaderRef) {
             if (_this._stickyHeaderRef !== stickyHeaderRef) {
@@ -83,6 +90,7 @@ var StickyContainer = /** @class */ (function (_super) {
             }
         };
         _this._onScroll = function (rawEvent, offsetX, offsetY) {
+            _this._getWindowCorrection(offsetX, offsetY, _this.props);
             if (_this._stickyHeaderRef) {
                 _this._stickyHeaderRef.onScroll(offsetY);
             }
@@ -133,8 +141,10 @@ var StickyContainer = /** @class */ (function (_super) {
             }
             return undefined;
         };
-        _this._getDistanceFromWindow = function () {
-            return _this._distanceFromWindow;
+        _this._applyWindowCorrection = function (offsetX, offsetY, windowCorrection) {
+            if (_this.props.applyWindowCorrection) {
+                _this.props.applyWindowCorrection(offsetX, offsetY, windowCorrection);
+            }
         };
         _this._initParams = function (props) {
             var childProps = props.children.props;
@@ -142,7 +152,6 @@ var StickyContainer = /** @class */ (function (_super) {
             _this._layoutProvider = childProps.layoutProvider;
             _this._extendedState = childProps.extendedState;
             _this._rowRenderer = childProps.rowRenderer;
-            _this._distanceFromWindow = childProps.distanceFromWindow ? childProps.distanceFromWindow : 0;
         };
         _this._assertChildType();
         var childProps = props.children.props;
@@ -150,24 +159,27 @@ var StickyContainer = /** @class */ (function (_super) {
         _this._layoutProvider = childProps.layoutProvider;
         _this._extendedState = childProps.extendedState;
         _this._rowRenderer = childProps.rowRenderer;
-        _this._distanceFromWindow = childProps.distanceFromWindow ? childProps.distanceFromWindow : 0;
+        _this._getWindowCorrection(0, 0, props);
         return _this;
     }
-    StickyContainer.prototype.componentWillReceiveProps = function (newProps) {
+    StickyContainer.prototype.componentWillReceivePropsCompat = function (newProps) {
         this._initParams(newProps);
     };
-    StickyContainer.prototype.render = function () {
+    StickyContainer.prototype.renderCompat = function () {
         var _this = this;
         this._assertChildType();
-        var recycler = React.cloneElement(this.props.children, __assign({}, this.props.children.props, { ref: this._getRecyclerRef, onVisibleIndicesChanged: this._onVisibleIndicesChanged, onScroll: this._onScroll }));
+        var recycler = React.cloneElement(this.props.children, __assign({}, this.props.children.props, { ref: this._getRecyclerRef, onVisibleIndicesChanged: this._onVisibleIndicesChanged, onScroll: this._onScroll, applyWindowCorrection: this._applyWindowCorrection }));
         return (React.createElement(react_native_1.View, { style: this.props.style ? this.props.style : { flex: 1 } },
             recycler,
-            this.props.stickyHeaderIndices ? (React.createElement(StickyHeader_1.default, { ref: function (stickyHeaderRef) { return _this._getStickyHeaderRef(stickyHeaderRef); }, stickyIndices: this.props.stickyHeaderIndices, getLayoutForIndex: this._getLayoutForIndex, getDataForIndex: this._getDataForIndex, getLayoutTypeForIndex: this._getLayoutTypeForIndex, getExtendedState: this._getExtendedState, getRLVRenderedSize: this._getRLVRenderedSize, getContentDimension: this._getContentDimension, getRowRenderer: this._getRowRenderer, getDistanceFromWindow: this._getDistanceFromWindow, overrideRowRenderer: this.props.overrideRowRenderer })) : null,
-            this.props.stickyFooterIndices ? (React.createElement(StickyFooter_1.default, { ref: function (stickyFooterRef) { return _this._getStickyFooterRef(stickyFooterRef); }, stickyIndices: this.props.stickyFooterIndices, getLayoutForIndex: this._getLayoutForIndex, getDataForIndex: this._getDataForIndex, getLayoutTypeForIndex: this._getLayoutTypeForIndex, getExtendedState: this._getExtendedState, getRLVRenderedSize: this._getRLVRenderedSize, getContentDimension: this._getContentDimension, getRowRenderer: this._getRowRenderer, getDistanceFromWindow: this._getDistanceFromWindow, overrideRowRenderer: this.props.overrideRowRenderer })) : null));
+            this.props.stickyHeaderIndices ? (React.createElement(StickyHeader_1.default, { ref: function (stickyHeaderRef) { return _this._getStickyHeaderRef(stickyHeaderRef); }, stickyIndices: this.props.stickyHeaderIndices, getLayoutForIndex: this._getLayoutForIndex, getDataForIndex: this._getDataForIndex, getLayoutTypeForIndex: this._getLayoutTypeForIndex, getExtendedState: this._getExtendedState, getRLVRenderedSize: this._getRLVRenderedSize, getContentDimension: this._getContentDimension, getRowRenderer: this._getRowRenderer, overrideRowRenderer: this.props.overrideRowRenderer, renderContainer: this.props.renderStickyContainer, getWindowCorrection: this._getCurrentWindowCorrection })) : null,
+            this.props.stickyFooterIndices ? (React.createElement(StickyFooter_1.default, { ref: function (stickyFooterRef) { return _this._getStickyFooterRef(stickyFooterRef); }, stickyIndices: this.props.stickyFooterIndices, getLayoutForIndex: this._getLayoutForIndex, getDataForIndex: this._getDataForIndex, getLayoutTypeForIndex: this._getLayoutTypeForIndex, getExtendedState: this._getExtendedState, getRLVRenderedSize: this._getRLVRenderedSize, getContentDimension: this._getContentDimension, getRowRenderer: this._getRowRenderer, overrideRowRenderer: this.props.overrideRowRenderer, renderContainer: this.props.renderStickyContainer, getWindowCorrection: this._getCurrentWindowCorrection })) : null));
+    };
+    StickyContainer.prototype._getWindowCorrection = function (offsetX, offsetY, props) {
+        return (props.applyWindowCorrection && props.applyWindowCorrection(offsetX, offsetY, this._windowCorrection)) || this._windowCorrection;
     };
     StickyContainer.propTypes = {};
     return StickyContainer;
-}(React.Component));
+}(ComponentCompat_1.ComponentCompat));
 exports.default = StickyContainer;
 StickyContainer.propTypes = {
     // Mandatory to pass a single child of RecyclerListView or any of its children classes. Exception will be thrown otherwise.
@@ -183,5 +195,11 @@ StickyContainer.propTypes = {
     overrideRowRenderer: PropTypes.func,
     // For all practical purposes, pass the style that is applied to the RecyclerListView component here.
     style: PropTypes.object,
+    // For providing custom container to StickyHeader and StickyFooter allowing user extensibility to stylize these items accordingly.
+    renderStickyContainer: PropTypes.func,
+    // Used when the logical offsetY differs from actual offsetY of recyclerlistview, could be because some other component is overlaying the recyclerlistview.
+    // For e.x. toolbar within CoordinatorLayout are overlapping the recyclerlistview.
+    // This method exposes the windowCorrection object of RecyclerListView, user can modify the values in realtime.
+    applyWindowCorrection: PropTypes.func,
 };
 //# sourceMappingURL=StickyContainer.js.map

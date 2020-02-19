@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
+var ComponentCompat_1 = require("../../utils/ComponentCompat");
 var BaseViewRenderer = /** @class */ (function (_super) {
     __extends(BaseViewRenderer, _super);
     function BaseViewRenderer() {
@@ -40,7 +40,7 @@ var BaseViewRenderer = /** @class */ (function (_super) {
         this.animatorStyleOverrides = undefined;
         this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef(), this.props.index);
     };
-    BaseViewRenderer.prototype.componentWillMount = function () {
+    BaseViewRenderer.prototype.componentWillMountCompat = function () {
         this.animatorStyleOverrides = this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
     };
     BaseViewRenderer.prototype.componentWillUnmount = function () {
@@ -50,6 +50,6 @@ var BaseViewRenderer = /** @class */ (function (_super) {
         return this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index, this.props.extendedState);
     };
     return BaseViewRenderer;
-}(React.Component));
+}(ComponentCompat_1.ComponentCompat));
 exports.default = BaseViewRenderer;
 //# sourceMappingURL=BaseViewRenderer.js.map

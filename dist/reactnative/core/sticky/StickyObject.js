@@ -20,6 +20,7 @@ var React = require("react");
 var react_native_1 = require("react-native");
 var RecyclerListViewExceptions_1 = require("../exceptions/RecyclerListViewExceptions");
 var CustomError_1 = require("../exceptions/CustomError");
+var ComponentCompat_1 = require("../../utils/ComponentCompat");
 var StickyType;
 (function (StickyType) {
     StickyType[StickyType["HEADER"] = 0] = "HEADER";
@@ -43,24 +44,29 @@ var StickyObject = /** @class */ (function (_super) {
         _this._smallestVisibleIndex = 0;
         _this._largestVisibleIndex = 0;
         _this._offsetY = 0;
-        _this.state = {
-            visible: _this.stickyVisiblity,
+        _this._windowCorrection = {
+            startCorrection: 0, endCorrection: 0, windowShift: 0,
         };
         return _this;
     }
-    StickyObject.prototype.componentWillReceiveProps = function (newProps) {
+    StickyObject.prototype.componentWillReceivePropsCompat = function (newProps) {
         this._initParams();
-        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY, newProps.getDistanceFromWindow(), this._windowBound);
+        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY, this._windowBound);
         this._computeLayouts(newProps.stickyIndices);
-        this.stickyViewVisible(this.stickyVisiblity);
+        this.stickyViewVisible(this.stickyVisiblity, false);
     };
-    StickyObject.prototype.render = function () {
-        return (React.createElement(react_native_1.Animated.View, { style: [
-                { position: "absolute", width: this._scrollableWidth, transform: [{ translateY: this._stickyViewOffset }] },
-                this.containerPosition,
-            ] }, this.state.visible ?
-            this._renderSticky()
-            : null));
+    StickyObject.prototype.renderCompat = function () {
+        // Add the container style if renderContainer is undefined
+        var containerStyle = [{ transform: [{ translateY: this._stickyViewOffset }] },
+            (!this.props.renderContainer && [{ position: "absolute", width: this._scrollableWidth }, this.containerPosition])];
+        var content = (React.createElement(react_native_1.Animated.View, { style: containerStyle }, this.stickyVisiblity ? this._renderSticky() : null));
+        if (this.props.renderContainer) {
+            var _extendedState = this.props.getExtendedState();
+            return this.props.renderContainer(content, this.currentStickyIndex, _extendedState);
+        }
+        else {
+            return (content);
+        }
     };
     StickyObject.prototype.onVisibleIndicesChanged = function (all) {
         if (this._firstCompute) {
@@ -69,14 +75,15 @@ var StickyObject = /** @class */ (function (_super) {
         }
         this._initParams();
         this._setSmallestAndLargestVisibleIndices(all);
-        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY, this.props.getDistanceFromWindow(), this._windowBound);
+        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY, this._windowBound);
         this._computeLayouts();
         this.stickyViewVisible(this.stickyVisiblity);
     };
     StickyObject.prototype.onScroll = function (offsetY) {
+        offsetY += this.getWindowCorrection(this.props).windowShift;
         this._initParams();
         this._offsetY = offsetY;
-        this.boundaryProcessing(offsetY, this.props.getDistanceFromWindow(), this._windowBound);
+        this.boundaryProcessing(offsetY, this._windowBound);
         if (this._previousStickyIndex !== undefined) {
             if (this._previousStickyIndex * this.stickyTypeMultiplier >= this.currentStickyIndex * this.stickyTypeMultiplier) {
                 throw new CustomError_1.default(RecyclerListViewExceptions_1.default.stickyIndicesArraySortError);
@@ -117,13 +124,18 @@ var StickyObject = /** @class */ (function (_super) {
             }
         }
     };
-    StickyObject.prototype.stickyViewVisible = function (_visible) {
-        this.setState({
-            visible: _visible,
-        });
+    StickyObject.prototype.stickyViewVisible = function (_visible, shouldTriggerRender) {
+        if (shouldTriggerRender === void 0) { shouldTriggerRender = true; }
+        this.stickyVisiblity = _visible;
+        if (shouldTriggerRender) {
+            this.setState({});
+        }
     };
-    StickyObject.prototype.boundaryProcessing = function (offsetY, distanceFromWindow, windowBound) {
-        var hasReachedBoundary = this.hasReachedBoundary(offsetY, distanceFromWindow, windowBound);
+    StickyObject.prototype.getWindowCorrection = function (props) {
+        return (props.getWindowCorrection && props.getWindowCorrection()) || this._windowCorrection;
+    };
+    StickyObject.prototype.boundaryProcessing = function (offsetY, windowBound) {
+        var hasReachedBoundary = this.hasReachedBoundary(offsetY, windowBound);
         if (this.bounceScrolling !== hasReachedBoundary) {
             this.bounceScrolling = hasReachedBoundary;
             if (this.bounceScrolling) {
@@ -135,6 +147,7 @@ var StickyObject = /** @class */ (function (_super) {
         }
     };
     StickyObject.prototype._initParams = function () {
+        this.getWindowCorrection(this.props);
         var rlvDimension = this.props.getRLVRenderedSize();
         if (rlvDimension) {
             this._scrollableHeight = rlvDimension.height;
@@ -187,6 +200,6 @@ var StickyObject = /** @class */ (function (_super) {
         }
     };
     return StickyObject;
-}(React.Component));
+}(ComponentCompat_1.ComponentCompat));
 exports.default = StickyObject;
 //# sourceMappingURL=StickyObject.js.map

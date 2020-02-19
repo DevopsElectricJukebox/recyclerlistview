@@ -74,7 +74,7 @@ var BinarySearch = /** @class */ (function () {
     BinarySearch.findValueSmallerThanTarget = function (values, target) {
         var low = 0;
         var high = values.length - 1;
-        if (target > values[high]) {
+        if (target >= values[high]) {
             return {
                 value: values[high],
                 index: high,

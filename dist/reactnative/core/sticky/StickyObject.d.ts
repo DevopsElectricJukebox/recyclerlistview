@@ -1,10 +1,12 @@
 /**
  * Created by ananya.chandra on 20/09/18.
  */
-import * as React from "react";
+/// <reference types="react" />
 import { StyleProp, ViewStyle } from "react-native";
 import { Layout } from "../layoutmanager/LayoutManager";
 import { Dimension } from "../dependencies/LayoutProvider";
+import { ComponentCompat } from "../../utils/ComponentCompat";
+import { WindowCorrection } from "../ViewabilityTracker";
 export declare enum StickyType {
     HEADER = 0,
     FOOTER = 1
@@ -18,13 +20,11 @@ export interface StickyObjectProps {
     getRLVRenderedSize: () => Dimension | undefined;
     getContentDimension: () => Dimension | undefined;
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
-    getDistanceFromWindow: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    renderContainer?: ((rowContent: JSX.Element, index: number, extendState?: object) => JSX.Element | null);
+    getWindowCorrection?: () => WindowCorrection;
 }
-export interface StickyObjectState {
-    visible: boolean;
-}
-export default abstract class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
+export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
     protected stickyType: StickyType;
     protected stickyTypeMultiplier: number;
     protected stickyVisiblity: boolean;
@@ -53,19 +53,21 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _smallestVisibleIndex;
     private _largestVisibleIndex;
     private _offsetY;
+    private _windowCorrection;
     constructor(props: P, context?: any);
-    componentWillReceiveProps(newProps: StickyObjectProps): void;
-    render(): JSX.Element | null;
+    componentWillReceivePropsCompat(newProps: StickyObjectProps): void;
+    renderCompat(): JSX.Element | null;
     onVisibleIndicesChanged(all: number[]): void;
     onScroll(offsetY: number): void;
-    protected abstract hasReachedBoundary(offsetY: number, distanceFromWindow: number, windowBound?: number): boolean;
+    protected abstract hasReachedBoundary(offsetY: number, windowBound?: number): boolean;
     protected abstract initStickyParams(): void;
-    protected abstract calculateVisibleStickyIndex(stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, distanceFromWindow: number, windowBound?: number): void;
+    protected abstract calculateVisibleStickyIndex(stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound?: number): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
     protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;
-    protected stickyViewVisible(_visible: boolean): void;
-    protected boundaryProcessing(offsetY: number, distanceFromWindow: number, windowBound?: number): void;
+    protected stickyViewVisible(_visible: boolean, shouldTriggerRender?: boolean): void;
+    protected getWindowCorrection(props: StickyObjectProps): WindowCorrection;
+    protected boundaryProcessing(offsetY: number, windowBound?: number): void;
     private _initParams;
     private _computeLayouts;
     private _setSmallestAndLargestVisibleIndices;

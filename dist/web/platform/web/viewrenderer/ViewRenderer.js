@@ -52,7 +52,7 @@ var ViewRenderer = /** @class */ (function (_super) {
     ViewRenderer.prototype.componentDidUpdate = function () {
         this._checkSizeChange();
     };
-    ViewRenderer.prototype.render = function () {
+    ViewRenderer.prototype.renderCompat = function () {
         var style = this.props.forceNonDeterministicRendering
             ? __assign({ transform: this._getTransform(), WebkitTransform: this._getTransform() }, styles.baseViewStyle, this.props.styleOverrides, this.animatorStyleOverrides) : __assign({ height: this.props.height, overflow: "hidden", width: this.props.width, transform: this._getTransform(), WebkitTransform: this._getTransform() }, styles.baseViewStyle, this.props.styleOverrides, this.animatorStyleOverrides);
         return (React.createElement("div", { ref: this._setRef, style: style }, this.renderChild()));
